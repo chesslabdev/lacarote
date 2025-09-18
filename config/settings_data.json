@@ -635,6 +635,9 @@
     }
   },
   "platform_customizations": {
-    "custom_css": []
+    "custom_css": [
+      ".resource-list__item {border: 1.2px solid #d3d3d3; border-radius: 8px; overflow: hidden;}",
+      ".product-grid__item {border: 1.2px solid #d3d3d3; border-radius: 8px; overflow: hidden;}"
+    ]
   }
 }
