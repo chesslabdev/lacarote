@@ -1,0 +1,971 @@
+{{ 'banner-slide.css' | asset_url | stylesheet_tag }}
+
+{% schema %}
+{
+  "name": "Banner de Slide",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "number",
+      "id": "tempo_transicao",
+      "label": "Tempo de Transição em segundos",
+      "default": 5
+    }
+  ],
+  "presets": [
+    {
+      "name": "Banner de Slide"
+    }
+  ],
+  "max_blocks": 5,
+  "blocks": [
+    {
+      "type": "imagem",
+      "name": "Banner Imagem",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "imagem_desktop",
+          "label": "Imagem para Desktop",
+          "info": "Tamanho de 1425 x 500 px"
+        },
+        {
+          "type": "image_picker",
+          "id": "imagem_mobile",
+          "label": "Imagem para Mobile",
+          "info": "Tamanho de 740 x 860 px"
+        },
+        {
+          "type": "checkbox",
+          "id": "ativar_link_banner",
+          "label": "Todo banner é clicável com link de destino?",
+          "default": false
+        },
+        {
+          "type": "url",
+          "id": "bannerlink",
+          "label": "Selecione o link de destino",
+          "default": "/"
+        },
+        {
+          "type": "text",
+          "id": "headline",
+          "label": "Headline",
+          "info": "Use as marcações especiais para estilizar: [[texto]] para Cor Fancy 1, ((texto)) para Cor Fancy 2, //texto\\ para Degradê Fancy, {{texto}} para background Cor Fancy 1, <<texto>> para background Cor Fancy 2, %%texto|| para background Degradê Fancy."
+        },
+        {
+          "type": "text",
+          "id": "subheadline",
+          "label": "Subheadline",
+          "info": "Use as mesmas marcações especiais da headline para estilizar."
+        },
+        {
+          "type": "color",
+          "id": "headline_color",
+          "label": "Cor da headline"
+        },
+        {
+          "type": "color",
+          "id": "subheadline_color",
+          "label": "Cor da subheadline"
+        },
+        {
+          "type": "checkbox",
+          "id": "exibir_cta",
+          "label": "Exibir CTA",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "texto_cta",
+          "label": "Texto do CTA"
+        },
+        {
+          "type": "url",
+          "id": "link_cta",
+          "label": "Link do CTA"
+        },
+        {
+          "type": "header",
+          "content": "Ajustes Desktop"
+        },
+        {
+          "type": "range",
+          "id": "largura_percent_desktop",
+          "label": "Largura máxima (Desktop)",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "tamanho_head_desktop",
+          "label": "Fonte headline (Desktop)",
+          "min": 16,
+          "max": 96,
+          "step": 2,
+          "default": 32
+        },
+        {
+          "type": "select",
+          "id": "peso_head_desktop",
+          "label": "Peso da fonte headline (Desktop)",
+          "options": [
+            { "value": "100", "label": "Thin (100)" },
+            { "value": "200", "label": "Extra Light (200)" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Normal (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi Bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra Bold (800)" },
+            { "value": "900", "label": "Black (900)" }
+          ],
+          "default": "400"
+        },
+        {
+          "type": "range",
+          "id": "tamanho_subhead_desktop",
+          "label": "Fonte subheadline (Desktop)",
+          "min": 14,
+          "max": 64,
+          "step": 2,
+          "default": 14
+        },
+        {
+          "type": "select",
+          "id": "peso_subhead_desktop",
+          "label": "Peso da fonte subheadline (Desktop)",
+          "options": [
+            { "value": "100", "label": "Thin (100)" },
+            { "value": "200", "label": "Extra Light (200)" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Normal (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi Bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra Bold (800)" },
+            { "value": "900", "label": "Black (900)" }
+          ],
+          "default": "400"
+        },
+        {
+          "type": "range",
+          "id": "espaco_top_desktop",
+          "label": "Espaçamento subheadline (Desktop)",
+          "min": 0,
+          "max": 100,
+          "unit": "px",
+          "step": 1,
+          "default": 20
+        },
+        {
+          "type": "range",
+          "id": "cta_top_desktop",
+          "label": "Espaçamento cta (Desktop)",
+          "min": 0,
+          "max": 100,
+          "unit": "px",
+          "step": 1,
+          "default": 20
+        },
+        {
+          "type": "range",
+          "id": "padding_lateral_desktop",
+          "label": "Padding Lateral (Desktop)",
+          "min": 0,
+          "max": 100,
+          "unit": "px",
+          "step": 1,
+          "default": 20
+        },
+        {
+          "type": "select",
+          "id": "alinhamento_desktop",
+          "label": "Alinhamento (Desktop)",
+          "options": [
+            { "value": "flex-start", "label": "Esquerda" },
+            { "value": "center", "label": "Centro" },
+            { "value": "flex-end", "label": "Direita" }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "range",
+          "id": "top_percent_desktop",
+          "label": "Top (%) (Desktop)",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "default": 50
+        },
+        {
+          "type": "range",
+          "id": "right_percent_desktop",
+          "label": "Right (%) (Desktop)",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "default": 0
+        },
+        {
+          "type": "header",
+          "content": "Ajustes Mobile"
+        },
+        {
+          "type": "range",
+          "id": "largura_percent_mobile",
+          "label": "Largura máxima (Mobile)",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "tamanho_head_mobile",
+          "label": "Fonte headline (Mobile)",
+          "min": 16,
+          "max": 96,
+          "step": 2,
+          "default": 32
+        },
+        {
+          "type": "select",
+          "id": "peso_head_mobile",
+          "label": "Peso da fonte headline (Mobile)",
+          "options": [
+            { "value": "100", "label": "Thin (100)" },
+            { "value": "200", "label": "Extra Light (200)" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Normal (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi Bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra Bold (800)" },
+            { "value": "900", "label": "Black (900)" }
+          ],
+          "default": "400"
+        },
+        {
+          "type": "range",
+          "id": "tamanho_subhead_mobile",
+          "label": "Fonte subheadline (Mobile)",
+          "min": 14,
+          "max": 64,
+          "step": 2,
+          "default": 14
+        },
+        {
+          "type": "select",
+          "id": "peso_subhead_mobile",
+          "label": "Peso da fonte subheadline (Mobile)",
+          "options": [
+            { "value": "100", "label": "Thin (100)" },
+            { "value": "200", "label": "Extra Light (200)" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Normal (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi Bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra Bold (800)" },
+            { "value": "900", "label": "Black (900)" }
+          ],
+          "default": "400"
+        },
+        {
+          "type": "range",
+          "id": "espaco_top_mobile",
+          "label": "Espaçamento subheadline (Mobile)",
+          "min": 0,
+          "max": 100,
+          "unit": "px",
+          "step": 1,
+          "default": 20
+        },
+        {
+          "type": "range",
+          "id": "cta_top_mobile",
+          "label": "Espaçamento cta (mobile)",
+          "min": 0,
+          "max": 100,
+          "unit": "px",
+          "step": 1,
+          "default": 20
+        },
+        {
+          "type": "range",
+          "id": "padding_lateral_mobile",
+          "label": "Padding Lateral (Mobile)",
+          "min": 0,
+          "max": 100,
+          "unit": "px",
+          "step": 1,
+          "default": 20
+        },
+        {
+          "type": "select",
+          "id": "alinhamento_mobile",
+          "label": "Alinhamento (Mobile)",
+          "options": [
+            { "value": "flex-start", "label": "Esquerda" },
+            { "value": "center", "label": "Centro" },
+            { "value": "flex-end", "label": "Direita" }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "range",
+          "id": "top_percent_mobile",
+          "label": "Top (%) (Mobile)",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "default": 50
+        },
+        {
+          "type": "range",
+          "id": "right_percent_mobile",
+          "label": "Right (%) (Mobile)",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "default": 0
+        },
+        {
+          "type": "header",
+          "content": "Botão CTA"
+        },
+        {
+          "type": "color",
+          "id": "botao_cor_fundo",
+          "label": "Cor de Fundo"
+        },
+        {
+          "type": "color",
+          "id": "botao_cor_borda",
+          "label": "Cor da Borda"
+        },
+        {
+          "type": "range",
+          "id": "botao_raio_borda",
+          "label": "Raio da Borda (px)",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "default": 4
+        },
+        {
+          "type": "color",
+          "id": "botao_cor_texto",
+          "label": "Cor da Fonte"
+        },
+        {
+          "type": "range",
+          "id": "botao_tamanho_fonte",
+          "label": "Tamanho da Fonte (px)",
+          "min": 10,
+          "max": 40,
+          "step": 1,
+          "default": 16
+        },
+        {
+          "type": "range",
+          "id": "botao_padding_vertical",
+          "label": "Espaçamento Vertical (px)",
+          "min": 0,
+          "max": 40,
+          "step": 1,
+          "default": 10
+        },
+        {
+          "type": "range",
+          "id": "botao_padding_horizontal",
+          "label": "Espaçamento Horizontal (px)",
+          "min": 0,
+          "max": 60,
+          "step": 1,
+          "default": 20
+        }
+      ]
+    },
+    {
+      "type": "video",
+      "name": "Vídeo Banner",
+      "settings": [
+        {
+          "type": "text",
+          "id": "video_url",
+          "label": "URL do vídeo Desktop (MP4 hospedado na Shopify)",
+          "info": "Use um link direto da seção Arquivos do Admin Shopify"
+        },
+        {
+          "type": "text",
+          "id": "video_url_mobile",
+          "label": "URL do vídeo Mobile (MP4 hospedado na Shopify)",
+          "info": "Opcional: Se não preenchido, será usado o vídeo desktop. Use um link direto da seção Arquivos do Admin Shopify"
+        },
+        {
+          "type": "checkbox",
+          "id": "ativar_link_banner",
+          "label": "Todo banner é clicável com link de destino?",
+          "default": false
+        },
+        {
+          "type": "url",
+          "id": "video_link",
+          "label": "Link de destino",
+          "default": "/"
+        },
+        {
+          "type": "text",
+          "id": "headline",
+          "label": "Headline",
+          "info": "Use as marcações especiais para estilizar: [[texto]] para Cor Fancy 1, ((texto)) para Cor Fancy 2, //texto\\ para Degradê Fancy, {{texto}} para background Cor Fancy 1, <<texto>> para background Cor Fancy 2, %%texto|| para background Degradê Fancy."
+        },
+        {
+          "type": "text",
+          "id": "subheadline",
+          "label": "Subheadline",
+          "info": "Use as mesmas marcações especiais da headline para estilizar."
+        },
+        {
+          "type": "color",
+          "id": "headline_color",
+          "label": "Cor da headline"
+        },
+        {
+          "type": "color",
+          "id": "subheadline_color",
+          "label": "Cor da subheadline"
+        },
+        {
+          "type": "checkbox",
+          "id": "exibir_cta",
+          "label": "Exibir CTA",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "texto_cta",
+          "label": "Texto do CTA"
+        },
+        {
+          "type": "url",
+          "id": "link_cta",
+          "label": "Link do CTA"
+        },
+        {
+          "type": "header",
+          "content": "Ajustes Desktop"
+        },
+        {
+          "type": "range",
+          "id": "largura_percent_desktop",
+          "label": "Largura máxima (Desktop)",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "tamanho_head_desktop",
+          "label": "Fonte headline (Desktop)",
+          "min": 16,
+          "max": 96,
+          "step": 2,
+          "default": 32
+        },
+        {
+          "type": "select",
+          "id": "peso_head_desktop",
+          "label": "Peso da fonte headline (Desktop)",
+          "options": [
+            { "value": "100", "label": "Thin (100)" },
+            { "value": "200", "label": "Extra Light (200)" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Normal (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi Bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra Bold (800)" },
+            { "value": "900", "label": "Black (900)" }
+          ],
+          "default": "400"
+        },
+        {
+          "type": "range",
+          "id": "tamanho_subhead_desktop",
+          "label": "Fonte subheadline (Desktop)",
+          "min": 14,
+          "max": 64,
+          "step": 2,
+          "default": 14
+        },
+        {
+          "type": "select",
+          "id": "peso_subhead_desktop",
+          "label": "Peso da fonte subheadline (Desktop)",
+          "options": [
+            { "value": "100", "label": "Thin (100)" },
+            { "value": "200", "label": "Extra Light (200)" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Normal (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi Bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra Bold (800)" },
+            { "value": "900", "label": "Black (900)" }
+          ],
+          "default": "400"
+        },
+        {
+          "type": "range",
+          "id": "espaco_top_desktop",
+          "label": "Espaçamento subheadline (Desktop)",
+          "min": 0,
+          "max": 100,
+          "unit": "px",
+          "step": 1,
+          "default": 20
+        },
+        {
+          "type": "range",
+          "id": "cta_top_desktop",
+          "label": "Espaçamento cta (Desktop)",
+          "min": 0,
+          "max": 100,
+          "unit": "px",
+          "step": 1,
+          "default": 20
+        },
+        {
+          "type": "range",
+          "id": "padding_lateral_desktop",
+          "label": "Padding Lateral (Desktop)",
+          "min": 0,
+          "max": 100,
+          "unit": "px",
+          "step": 1,
+          "default": 20
+        },
+        {
+          "type": "select",
+          "id": "alinhamento_desktop",
+          "label": "Alinhamento (Desktop)",
+          "options": [
+            { "value": "flex-start", "label": "Esquerda" },
+            { "value": "center", "label": "Centro" },
+            { "value": "flex-end", "label": "Direita" }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "range",
+          "id": "top_percent_desktop",
+          "label": "Eixo vertical (%) (Desktop)",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "default": 50
+        },
+        {
+          "type": "range",
+          "id": "right_percent_desktop",
+          "label": "Eixo horizontal (%) (Desktop)",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "default": 0
+        },
+        {
+          "type": "header",
+          "content": "Ajustes Mobile"
+        },
+        {
+          "type": "range",
+          "id": "largura_percent_mobile",
+          "label": "Largura máxima (Mobile)",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "tamanho_head_mobile",
+          "label": "Fonte headline (Mobile)",
+          "min": 16,
+          "max": 96,
+          "step": 2,
+          "default": 32
+        },
+        {
+          "type": "select",
+          "id": "peso_head_mobile",
+          "label": "Peso da fonte headline (Mobile)",
+          "options": [
+            { "value": "100", "label": "Thin (100)" },
+            { "value": "200", "label": "Extra Light (200)" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Normal (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi Bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra Bold (800)" },
+            { "value": "900", "label": "Black (900)" }
+          ],
+          "default": "400"
+        },
+        {
+          "type": "range",
+          "id": "tamanho_subhead_mobile",
+          "label": "Fonte subheadline (Mobile)",
+          "min": 14,
+          "max": 64,
+          "step": 2,
+          "default": 14
+        },
+        {
+          "type": "select",
+          "id": "peso_subhead_mobile",
+          "label": "Peso da fonte subheadline (Mobile)",
+          "options": [
+            { "value": "100", "label": "Thin (100)" },
+            { "value": "200", "label": "Extra Light (200)" },
+            { "value": "300", "label": "Light (300)" },
+            { "value": "400", "label": "Normal (400)" },
+            { "value": "500", "label": "Medium (500)" },
+            { "value": "600", "label": "Semi Bold (600)" },
+            { "value": "700", "label": "Bold (700)" },
+            { "value": "800", "label": "Extra Bold (800)" },
+            { "value": "900", "label": "Black (900)" }
+          ],
+          "default": "400"
+        },
+        {
+          "type": "range",
+          "id": "espaco_top_mobile",
+          "label": "Espaçamento subheadline (Mobile)",
+          "min": 0,
+          "max": 100,
+          "unit": "px",
+          "step": 1,
+          "default": 20
+        },
+        {
+          "type": "range",
+          "id": "cta_top_mobile",
+          "label": "Espaçamento cta (mobile)",
+          "min": 0,
+          "max": 100,
+          "unit": "px",
+          "step": 1,
+          "default": 20
+        },
+        {
+          "type": "range",
+          "id": "padding_lateral_mobile",
+          "label": "Padding Lateral (Mobile)",
+          "min": 0,
+          "max": 100,
+          "unit": "px",
+          "step": 1,
+          "default": 20
+        },
+        {
+          "type": "select",
+          "id": "alinhamento_mobile",
+          "label": "Alinhamento (Mobile)",
+          "options": [
+            { "value": "flex-start", "label": "Esquerda" },
+            { "value": "center", "label": "Centro" },
+            { "value": "flex-end", "label": "Direita" }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "range",
+          "id": "top_percent_mobile",
+          "label": "Eixo vertical (%) (Mobile)",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "default": 50
+        },
+        {
+          "type": "range",
+          "id": "right_percent_mobile",
+          "label": "Eixo horizontal (%) (Mobile)",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "default": 0
+        },
+        {
+          "type": "header",
+          "content": "Botão CTA"
+        },
+        {
+          "type": "color",
+          "id": "botao_cor_fundo",
+          "label": "Cor de Fundo"
+        },
+        {
+          "type": "color",
+          "id": "botao_cor_borda",
+          "label": "Cor da Borda"
+        },
+        {
+          "type": "range",
+          "id": "botao_raio_borda",
+          "label": "Raio da Borda (px)",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "default": 4
+        },
+        {
+          "type": "color",
+          "id": "botao_cor_texto",
+          "label": "Cor da Fonte"
+        },
+        {
+          "type": "range",
+          "id": "botao_tamanho_fonte",
+          "label": "Tamanho da Fonte (px)",
+          "min": 10,
+          "max": 40,
+          "step": 1,
+          "default": 16
+        },
+        {
+          "type": "range",
+          "id": "botao_padding_vertical",
+          "label": "Espaçamento Vertical (px)",
+          "min": 0,
+          "max": 40,
+          "step": 1,
+          "default": 10
+        },
+        {
+          "type": "range",
+          "id": "botao_padding_horizontal",
+          "label": "Espaçamento Horizontal (px)",
+          "min": 0,
+          "max": 60,
+          "step": 1,
+          "default": 20
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+{% assign fancy_text_color_1 = settings.fancy_text_color_1 %}
+{% assign fancy_text_color_2 = settings.fancy_text_color_2 %}
+{% assign fancy_text_gradient = settings.fancy_text_gradient %}
+
+<style>
+  .fancy-1 { color: {{ fancy_text_color_1 }}; }
+  .fancy-2 { color: {{ fancy_text_color_2 }}; }
+  .fancy-gradient {
+    background: {{ fancy_text_gradient }};
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  .fancy-bg-1 {
+    background-color: {{ fancy_text_color_1 }};
+    padding: 2px 6px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .fancy-bg-2 {
+    background-color: {{ fancy_text_color_2 }};
+    padding: 2px 6px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .fancy-bg-gradient {
+    background: {{ fancy_text_gradient }};
+    padding: 2px 6px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+</style>
+
+<div class="banner-wrapper swiper" id="banner-slide" data-tempodelay="{{ section.settings.tempo_transicao }}">
+  <div class="banner-cont swiper-wrapper">
+    {% for block in section.blocks %}
+      <style>
+        .banner-{{ block.id }} {
+          transform: translateY(-50%);
+          position: absolute;
+          display: flex;
+          flex-direction: column;
+          align-items: {{ block.settings.alinhamento_desktop }};
+          top: {{ block.settings.top_percent_desktop }}%;
+          left: {{ block.settings.right_percent_desktop }}%;
+          padding-left: {{ block.settings.padding_lateral_desktop }}px;
+          padding-right: {{ block.settings.padding_lateral_desktop }}px;
+          text-align: {{ block.settings.alinhamento_desktop | replace: 'flex-start', 'left' | replace: 'flex-end', 'right' }};
+          z-index: 10;
+          max-width: {{ block.settings.largura_percent_desktop }}%;
+        }
+        .banner-{{ block.id }} .headline {
+          color: {{ block.settings.headline_color }};
+          font-size: {{ block.settings.tamanho_head_desktop }}px;
+          font-weight: {{ block.settings.peso_head_desktop }};
+        }
+        .banner-{{ block.id }} .subheadline {
+          margin-top: {{ block.settings.espaco_top_desktop }}px;
+          color: {{ block.settings.subheadline_color }};
+          font-size: {{ block.settings.tamanho_subhead_desktop }}px;
+          font-weight: {{ block.settings.peso_subhead_desktop }};
+        }
+        .banner-{{ block.id }} .cta {
+          margin-top: {{ block.settings.cta_top_desktop }}px;
+        }
+        .banner-{{ block.id }} .botao-cta {
+          background-color: {{ block.settings.botao_cor_fundo }};
+          border: 1px solid {{ block.settings.botao_cor_borda }};
+          border-radius: {{ block.settings.botao_raio_borda }}px;
+          color: {{ block.settings.botao_cor_texto }};
+          font-weight: bold;
+          font-size: {{ block.settings.botao_tamanho_fonte }}px;
+          padding: {{ block.settings.botao_padding_vertical }}px {{ block.settings.botao_padding_horizontal }}px;
+          display: inline-block;
+          text-align: center;
+          text-decoration: none;
+          transition: all ease .4s;
+        }
+        .banner-{{ block.id }} .botao-cta:hover {
+          background-color: {{ block.settings.botao_cor_fundo | color_modify: 'alpha', 1.5 }};
+          box-shadow:
+            0px 0px 15px {{ block.settings.botao_cor_fundo | color_modify: 'alpha', 0.3 }},
+            0px 0px 4px {{ block.settings.botao_cor_fundo | color_modify: 'alpha', 0.3 }};
+        }
+
+
+        @media (max-width: 749px) {
+          .banner-{{ block.id }} .headline {
+            font-size: {{ block.settings.tamanho_head_mobile }}px;
+            font-weight: {{ block.settings.peso_head_mobile }};
+          }
+          .banner-{{ block.id }} .subheadline {
+            margin-top: {{ block.settings.espaco_top_mobile }}px;
+            font-size: {{ block.settings.tamanho_subhead_mobile }}px;
+            font-weight: {{ block.settings.peso_subhead_mobile }};
+          }
+          .banner-{{ block.id }} .cta {
+            margin-top: {{ block.settings.cta_top_mobile }}px;
+          }
+          .banner-{{ block.id }} {
+            align-items: {{ block.settings.alinhamento_mobile }};
+            top: {{ block.settings.top_percent_mobile }}%;
+            right: {{ block.settings.right_percent_mobile }}%;
+            padding-left: {{ block.settings.padding_lateral_mobile }}px;
+            padding-right: {{ block.settings.padding_lateral_mobile }}px;
+            text-align: {{ block.settings.alinhamento_mobile | replace: 'flex-start', 'left' | replace: 'flex-end', 'right' }};
+            max-width: {{ block.settings.largura_percent_mobile }}%;
+          }
+        }
+      </style>
+
+      {% assign link_destino = block.settings.bannerlink %}
+      {% if block.type == 'video' %}
+        {% assign link_destino = block.settings.video_link %}
+      {% endif %}
+
+      {% if block.settings.ativar_link_banner %}
+        <a class="banner-bloco swiper-slide" href="{{ link_destino }}">
+      {% else %}
+        <div class="banner-bloco swiper-slide">
+      {% endif %}
+      {% if block.type == 'imagem' %}
+        <picture>
+          <source media="(min-width: 768px)" srcset="{{ block.settings.imagem_desktop | img_url: 'master' }}">
+          <source media="(max-width: 767px)" srcset="{{ block.settings.imagem_mobile | img_url: 'master' }}">
+          <img src="{{ block.settings.imagem_desktop | img_url: 'master'}}" alt="" aria-hidden="true">
+        </picture>
+      {% elsif block.type == 'video' %}
+        {% if block.settings.video_url_mobile != blank %}
+          <video autoplay muted loop playsinline class="banner-video banner-video-desktop">
+            <source src="{{ block.settings.video_url }}" type="video/mp4">
+          </video>
+          <video autoplay muted loop playsinline class="banner-video banner-video-mobile">
+            <source src="{{ block.settings.video_url_mobile }}" type="video/mp4">
+          </video>
+          <style>
+            @media (min-width: 768px) {
+              .banner-video-mobile { display: none; }
+            }
+            @media (max-width: 767px) {
+              .banner-video-desktop { display: none; }
+            }
+          </style>
+        {% else %}
+          <video autoplay muted loop playsinline class="banner-video">
+            <source src="{{ block.settings.video_url }}" type="video/mp4">
+          </video>
+        {% endif %}
+      {% endif %}
+
+      <div class="banner-{{ block.id }}">
+        {% if block.settings.headline != blank %}
+          {% assign texto = block.settings.headline
+            | replace: '[[', '<span class="fancy-1">'
+            | replace: ']]', '</span>'
+            | replace: '((', '<span class="fancy-2">'
+            | replace: '))', '</span>'
+            | replace: '//', '<span class="fancy-gradient">'
+            | replace: '\\', '</span>'
+            | replace: '{{', '<span class="fancy-bg-1">'
+            | replace: '}}', '</span>'
+            | replace: '<<', '<span class="fancy-bg-2">'
+            | replace: '>>', '</span>'
+            | replace: '%%', '<span class="fancy-bg-gradient">'
+            | replace: '||', '</span>'
+          %}
+          <h1 class="headline">{{ texto | raw }}</h1>
+        {% endif %}
+        {% if block.settings.subheadline != blank %}
+          {% assign texto_sub = block.settings.subheadline
+            | replace: '[[', '<span class="fancy-1">'
+            | replace: ']]', '</span>'
+            | replace: '((', '<span class="fancy-2">'
+            | replace: '))', '</span>'
+            | replace: '//', '<span class="fancy-gradient">'
+            | replace: '\\', '</span>'
+            | replace: '{{', '<span class="fancy-bg-1">'
+            | replace: '}}', '</span>'
+            | replace: '<<', '<span class="fancy-bg-2">'
+            | replace: '>>', '</span>'
+            | replace: '%%', '<span class="fancy-bg-gradient">'
+            | replace: '||', '</span>'
+          %}
+          <div class="subheadline">{{ texto_sub | raw }}</div>
+        {% endif %}
+        {% if block.settings.exibir_cta %}
+          <div class="cta">
+            <a href="{{ block.settings.link_cta }}" class="botao-cta">{{ block.settings.texto_cta }}</a>
+          </div>
+        {% endif %}
+      </div>
+      {% if block.settings.ativar_link_banner %}
+        </a>
+      {% else %}
+        </div>
+      {% endif %}
+    {% endfor %}
+
+    <div class="swiper-pagination" id="banner-bloco-pagination"></div>
+  </div>
+</div>
+
+<script src="{{ 'banner-slide.js' | asset_url }}" defer></script>

@@ -1,0 +1,350 @@
+{% comment %}
+  Theme Block global para exibir parcelamento
+  Compatível com product cards, páginas de produto e qualquer contexto com produto
+{% endcomment %}
+
+{% liquid
+  # Sempre usa o produto do contexto mais próximo
+  assign target_product = closest.product
+  
+  # Cálculo do parcelamento
+  if target_product != blank and target_product.price > 0
+    case block.settings.tipo_parcelamento
+      when 'com_juros'
+        assign max_parcelas = block.settings.maior_parcela_com
+        assign valor_produto = target_product.price | divided_by: 100.0
+        assign taxa_juros = block.settings.juros_mes | times: 1.0 | divided_by: 100.0
+        
+        if valor_produto > 0 and taxa_juros >= 0
+          assign base = 1 | plus: taxa_juros
+          assign potencia = 1.0
+          
+          for i in (1..max_parcelas)
+            assign potencia = potencia | times: base
+          endfor
+          
+          assign numerador = valor_produto | times: taxa_juros | times: potencia
+          assign denominador = potencia | minus: 1
+          
+          if denominador > 0
+            assign valor_parcela = numerador | divided_by: denominador
+            assign valor_parcela = valor_parcela | times: 100
+          else
+            assign valor_parcela = target_product.price | divided_by: max_parcelas
+          endif
+        else
+          assign valor_parcela = target_product.price | divided_by: max_parcelas
+        endif
+        
+      when 'sem_juros'
+        assign max_parcelas = block.settings.maior_parcela_sem
+        assign valor_parcela = target_product.price | divided_by: max_parcelas
+    endcase
+  endif
+%}
+
+<style>
+  #parcelamento-{{ block.id }} {
+    display: flex;
+    align-items: center;
+    gap: {{ block.settings.gap_icone }}px;
+    width: fit-content;
+    {% if block.settings.alinhamento == 'center' %}
+      margin: 0 auto;
+    {% elsif block.settings.alinhamento == 'right' %}
+      margin-left: auto;
+    {% endif %}
+    margin-top: {{ block.settings.margem_superior }}px;
+    margin-bottom: {{ block.settings.margem_inferior }}px;
+  }
+
+  #parcelamento-{{ block.id }} .card-img-parcela {
+    width: auto;
+    height: {{ block.settings.tamanho_icone }}px;
+    color: {{ block.settings.cor_icone }};
+  }
+
+  #parcelamento-{{ block.id }} .price-parcelamento {
+    color: {{ block.settings.cor_texto }};
+    font-size: {{ block.settings.tamanho_fonte }}px;
+    {% if block.settings.texto_negrito %}
+      font-weight: bold;
+    {% endif %}
+    {% if block.settings.texto_italico %}
+      font-style: italic;
+    {% endif %}
+    {% if block.settings.texto_maiusculo %}
+      text-transform: uppercase;
+    {% endif %}
+  }
+
+  @media screen and (max-width: 749px) {
+    #parcelamento-{{ block.id }} {
+      {% if block.settings.alinhamento_mobile == 'center' %}
+        margin: 0 auto;
+      {% elsif block.settings.alinhamento_mobile == 'right' %}
+        margin-left: auto;
+      {% elsif block.settings.alinhamento_mobile != 'inherit' %}
+        margin-left: 0;
+      {% endif %}
+      margin-top: {{ block.settings.margem_superior_mobile }}px;
+      margin-bottom: {{ block.settings.margem_inferior_mobile }}px;
+    }
+
+    #parcelamento-{{ block.id }} .price-parcelamento {
+      font-size: {{ block.settings.tamanho_fonte_mobile }}px;
+    }
+  }
+</style>
+
+<div id="parcelamento-{{ block.id }}" class="parcelamento-wrapper" {{ block.shopify_attributes }}>
+  {% if block.settings.exibir_icone %}
+    {% render 'cartao', classe: 'card-img-parcela' %}
+  {% endif %}
+  
+  <span class="price-parcelamento">
+    {% if target_product != blank and target_product.price > 0 %}
+      {% case block.settings.tipo_parcelamento %}
+        {% when 'com_juros' %}
+          {{ block.settings.maior_parcela_com }}x de
+          <span class="parcela-calculada parcela-{{ target_product.id }}">
+            {{ valor_parcela | money }}
+          </span>
+        {% when 'sem_juros' %}
+          {{ block.settings.maior_parcela_sem }}x {{ valor_parcela | money }} s/ juros
+      {% endcase %}
+    {% else %}
+      {% comment %}Fallback quando produto não está disponível{% endcomment %}
+      {{ block.settings.maior_parcela_sem }}x sem juros
+    {% endif %}
+  </span>
+</div>
+
+{% schema %}
+{
+  "name": "Parcelamento",
+  "class": "parcelamento-block",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Configurações do Parcelamento"
+    },
+    {
+      "type": "select",
+      "id": "tipo_parcelamento",
+      "label": "Tipo de parcelamento",
+      "default": "sem_juros",
+      "options": [
+        {
+          "label": "Maior parcelamento COM juros",
+          "value": "com_juros"
+        },
+        {
+          "label": "Maior parcela SEM juros",
+          "value": "sem_juros"
+        }
+      ]
+    },
+    {
+      "type": "number",
+      "id": "maior_parcela_com",
+      "label": "Maior parcela COM juros",
+      "default": 12,
+      "info": "Usado quando 'COM juros' estiver selecionado"
+    },
+    {
+      "type": "number",
+      "id": "maior_parcela_sem",
+      "label": "Maior parcela SEM juros",
+      "default": 6,
+      "info": "Usado quando 'SEM juros' estiver selecionado"
+    },
+    {
+      "type": "text",
+      "id": "juros_mes",
+      "label": "Taxa de juros ao mês (%)",
+      "default": "1.99",
+      "info": "Use ponto (.) ao invés de vírgula (,). Ex: 1.99"
+    },
+    {
+      "type": "header",
+      "content": "Aparência"
+    },
+    {
+      "type": "checkbox",
+      "id": "exibir_icone",
+      "label": "Exibir ícone do cartão",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "tamanho_icone",
+      "label": "Tamanho do ícone",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "gap_icone",
+      "label": "Espaçamento entre ícone e texto",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "color",
+      "id": "cor_icone",
+      "label": "Cor do ícone",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Texto"
+    },
+    {
+      "type": "color",
+      "id": "cor_texto",
+      "label": "Cor do texto",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "tamanho_fonte",
+      "label": "Tamanho da fonte (desktop)",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "tamanho_fonte_mobile",
+      "label": "Tamanho da fonte (mobile)",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "checkbox",
+      "id": "texto_negrito",
+      "label": "Texto em negrito",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "texto_italico",
+      "label": "Texto em itálico",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "texto_maiusculo",
+      "label": "Texto em maiúsculas",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Posicionamento"
+    },
+    {
+      "type": "select",
+      "id": "alinhamento",
+      "label": "Alinhamento (desktop)",
+      "default": "left",
+      "options": [
+        {
+          "label": "Esquerda",
+          "value": "left"
+        },
+        {
+          "label": "Centro",
+          "value": "center"
+        },
+        {
+          "label": "Direita",
+          "value": "right"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "alinhamento_mobile",
+      "label": "Alinhamento (mobile)",
+      "default": "left",
+      "options": [
+        {
+          "label": "Herdar do desktop",
+          "value": "inherit"
+        },
+        {
+          "label": "Esquerda",
+          "value": "left"
+        },
+        {
+          "label": "Centro",
+          "value": "center"
+        },
+        {
+          "label": "Direita",
+          "value": "right"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "margem_superior",
+      "label": "Margem superior (desktop)",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "margem_inferior",
+      "label": "Margem inferior (desktop)",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margem_superior_mobile",
+      "label": "Margem superior (mobile)",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "margem_inferior_mobile",
+      "label": "Margem inferior (mobile)",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Parcelamento",
+      "category": "Preços"
+    }
+  ]
+}
+{% endschema %}

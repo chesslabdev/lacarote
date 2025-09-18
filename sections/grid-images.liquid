@@ -1,0 +1,535 @@
+{% comment %}
+  Seção: Grid de Imagens Dinâmica com Controladores Avançados
+  Arquivo: sections/grid-images.liquid
+  Compatível com: Tema Horizon Shopify
+  Layouts: Dinâmico baseado no número de cards
+{% endcomment %}
+
+<!-- Incluir CSS -->
+{{ 'grid-images.css' | asset_url | stylesheet_tag }}
+
+<!-- Contar cards ativos -->
+{% assign card_count = 0 %}
+{% for block in section.blocks %}
+  {% if block.settings.image or block.settings.heading != blank %}
+    {% assign card_count = card_count | plus: 1 %}
+  {% endif %}
+{% endfor %}
+
+<!-- Determinar layout baseado no número de cards -->
+{% assign layout_class = 'grid-layout--single' %}
+{% assign grid_template = '' %}
+
+{% if card_count == 1 %}
+  {% assign layout_class = 'grid-layout--single' %}
+{% elsif card_count == 2 %}
+  {% assign layout_class = 'grid-layout--two-cards' %}
+  {% assign card1_size = section.settings.card1_size | default: 1 %}
+  {% assign card2_size = section.settings.card2_size | default: 1 %}
+  {% capture grid_template %}{{ card1_size }}fr {{ card2_size }}fr{% endcapture %}
+{% elsif card_count == 3 %}
+  {% if section.settings.three_cards_layout == 'default' %}
+    {% assign layout_class = 'grid-layout--default' %}
+  {% else %}
+    {% assign layout_class = 'grid-layout--three-cards' %}
+    {% assign card1_size = section.settings.three_card1_size | default: 1 %}
+    {% assign card2_size = section.settings.three_card2_size | default: 1 %}
+    {% assign card3_size = section.settings.three_card3_size | default: 1 %}
+    {% capture grid_template %}{{ card1_size }}fr {{ card2_size }}fr {{ card3_size }}fr{% endcapture %}
+  {% endif %}
+{% endif %}
+
+<!-- Determinar classe de largura da página -->
+{% assign page_width_class = 'page-width--full' %}
+{% if section.settings.page_width == 'page' %}
+  {% assign page_width_class = 'page-width--contained' %}
+{% endif %}
+
+<section 
+  class="grid-image-section color-{{ section.settings.color_scheme }} {{ layout_class }} {{ page_width_class }}" 
+  id="grid-section-{{ section.id }}"
+  data-card-count="{{ card_count }}"
+  data-layout="{{ section.settings.three_cards_layout }}"
+  {% if grid_template != '' %}
+    style="--grid-template: {{ grid_template }}; --grid-gap: {{ section.settings.grid_gap | default: 24 }}px; --section-padding-top: {{ section.settings.padding_top }}px; --section-padding-bottom: {{ section.settings.padding_bottom }}px;"
+  {% else %}
+    style="--grid-gap: {{ section.settings.grid_gap | default: 24 }}px; --section-padding-top: {{ section.settings.padding_top }}px; --section-padding-bottom: {{ section.settings.padding_bottom }}px;"
+  {% endif %}
+>
+  <div class="grid-container">
+    {% if card_count == 3 and section.settings.three_cards_layout == 'default' %}
+      <!-- Layout padrão: 2 colunas com segunda dividida -->
+      <div class="grid-item grid-item--large">
+        {% for block in section.blocks limit: 1 %}
+          {% render 'grid-card', 
+            block: block,
+            section: section,
+            index: forloop.index
+          %}
+        {% endfor %}
+      </div>
+      
+      <div class="grid-item grid-item--split">
+        {% for block in section.blocks offset: 1 limit: 2 %}
+          {% render 'grid-card', 
+            block: block,
+            section: section,
+            index: forloop.index | plus: 1,
+            modifier: 'small'
+          %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <!-- Layouts lineares (1, 2 ou 3 cards lado a lado) -->
+      {% for block in section.blocks limit: 3 %}
+        {% if block.settings.image or block.settings.heading != blank %}
+          <div class="grid-item">
+            {% render 'grid-card', 
+              block: block,
+              section: section,
+              index: forloop.index
+            %}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+</section>
+
+<!-- Incluir JavaScript -->
+<script src="{{ 'grid-images.js' | asset_url }}" defer></script>
+
+<!-- Estilos inline para configurações dinâmicas -->
+<style>
+  #grid-section-{{ section.id }} {
+    --gradient-start-color: {{ section.settings.gradient_start_color | default: '#ffffff' }};
+    --gradient-end-color: {{ section.settings.gradient_end_color | default: '#eae2e2' }};
+    --gradient-angle: {{ section.settings.gradient_angle | default: 212 }}deg;
+    --gradient-start-position: {{ section.settings.gradient_start_position | default: 30 }}%;
+    --gradient-end-position: {{ section.settings.gradient_end_position | default: 83 }}%;
+    --button-background: {{ section.settings.button_background_color }};
+    --button-text-color: {{ section.settings.button_text_color }};
+    --button-border-radius: {{ section.settings.button_border_radius }}px;
+    --button-border-width: {{ section.settings.button_border_width }}px;
+    --button-border-color: {{ section.settings.button_border_color }};
+    --heading-font-size-desktop: {{ section.settings.heading_font_size_desktop }}px;
+    --heading-font-size-mobile: {{ section.settings.heading_font_size_mobile }}px;
+    --heading-font-weight: {{ section.settings.heading_font_weight }};
+    --heading-font-family: {{ section.settings.heading_font_family }};
+    --heading-text-transform: {{ section.settings.heading_text_transform }};
+    --heading-line-height: {{ section.settings.heading_line_height }};
+  }
+  
+  {% if section.settings.button_background_color != blank %}
+    #grid-section-{{ section.id }} .grid-card__button {
+      background-color: {{ section.settings.button_background_color }};
+    }
+  {% endif %}
+  
+  {% if section.settings.button_text_color != blank %}
+    #grid-section-{{ section.id }} .grid-card__button {
+      color: {{ section.settings.button_text_color }};
+    }
+  {% endif %}
+  
+  {% if section.settings.button_hover_background != blank %}
+    #grid-section-{{ section.id }} .grid-card__button:hover {
+      background-color: {{ section.settings.button_hover_background }};
+    }
+  {% endif %}
+  
+  {% if section.settings.button_hover_text_color != blank %}
+    #grid-section-{{ section.id }} .grid-card__button:hover {
+      color: {{ section.settings.button_hover_text_color }};
+    }
+  {% endif %}
+</style>
+
+{% schema %}
+{
+  "name": "Grid de Imagens Dinâmica",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "max_blocks": 3,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout Geral"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "options": [
+        { "value": "background-1", "label": "Background 1" },
+        { "value": "background-2", "label": "Background 2" },
+        { "value": "inverse",      "label": "Inverso" },
+        { "value": "accent-1",     "label": "Accent 1" },
+        { "value": "accent-2",     "label": "Accent 2" }
+      ],
+      "default": "background-1",
+      "label": "Esquema de cores"
+    },
+    {
+      "type": "select",
+      "id": "page_width",
+      "options": [
+        { "value": "full", "label": "Largura total" },
+        { "value": "page", "label": "Largura da página" }
+      ],
+      "default": "full",
+      "label": "Largura da seção",
+      "info": "Define se a seção ocupa toda a tela ou respeita a largura máxima da página"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Espaçamento superior",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Espaçamento inferior",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "grid_gap",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Espaçamento entre cards",
+      "default": 24
+    },
+
+    { "type": "header", "content": "Gradiente Overlay" },
+
+    {
+      "type": "color",
+      "id": "gradient_start_color",
+      "label": "Cor inicial do gradiente",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "gradient_end_color",
+      "label": "Cor final do gradiente",
+      "default": "#eae2e2"
+    },
+    {
+      "type": "range",
+      "id": "gradient_angle",
+      "min": 0,
+      "max": 360,
+      "step": 4,
+      "unit": "deg",
+      "label": "Ângulo do gradiente",
+      "default": 212
+    },
+    {
+      "type": "range",
+      "id": "gradient_start_position",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Posição inicial do gradiente",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "gradient_end_position",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "label": "Posição final do gradiente",
+      "default": 83
+    },
+
+    { "type": "header", "content": "Tipografia" },
+
+    {
+      "type": "select",
+      "id": "heading_font_family",
+      "options": [
+        { "value": "var(--font-heading-family)", "label": "Fonte do título (padrão)" },
+        { "value": "var(--font-body-family)",    "label": "Fonte do corpo" },
+        { "value": "'Helvetica Neue', sans-serif", "label": "Helvetica Neue" },
+        { "value": "'Georgia', serif",             "label": "Georgia" },
+        { "value": "'Montserrat', sans-serif",     "label": "Montserrat" }
+      ],
+      "default": "var(--font-heading-family)",
+      "label": "Família da fonte"
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size_desktop",
+      "min": 20,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "label": "Tamanho da fonte (Desktop)",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size_mobile",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Tamanho da fonte (Mobile)",
+      "default": 32
+    },
+    {
+      "type": "select",
+      "id": "heading_font_weight",
+      "options": [
+        { "value": "300", "label": "Light (300)" },
+        { "value": "400", "label": "Normal (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semibold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "900", "label": "Black (900)" }
+      ],
+      "default": "600",
+      "label": "Peso da fonte"
+    },
+    {
+      "type": "select",
+      "id": "heading_text_transform",
+      "options": [
+        { "value": "none",       "label": "Normal" },
+        { "value": "uppercase",  "label": "MAIÚSCULAS" },
+        { "value": "lowercase",  "label": "minúsculas" },
+        { "value": "capitalize", "label": "Capitalizar" }
+      ],
+      "default": "none",
+      "label": "Transformação do texto"
+    },
+    {
+      "type": "range",
+      "id": "heading_line_height",
+      "min": 0.8,
+      "max": 2,
+      "step": 0.1,
+      "label": "Altura da linha",
+      "default": 1.2
+    },
+    {
+      "type": "checkbox",
+      "id": "heading_underline",
+      "label": "Ativar sublinhado no título",
+      "default": true
+    },
+
+    { "type": "header", "content": "Configurações do Botão" },
+
+    {
+      "type": "color",
+      "id": "button_background_color",
+      "label": "Cor de fundo do botão",
+      "info": "Deixe vazio para usar a cor padrão do tema"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Cor do texto do botão",
+      "info": "Deixe vazio para usar a cor padrão do tema"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background",
+      "label": "Cor de fundo (hover)"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Cor do texto (hover)"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Arredondamento do botão",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "button_border_width",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "label": "Largura da borda",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Cor da borda"
+    },
+
+    { "type": "header", "content": "Layout com 2 Cards" },
+
+    {
+      "type": "range",
+      "id": "card1_size",
+      "min": 1,
+      "max": 3,
+      "step": 0.5,
+      "label": "Tamanho do Card 1 (fr)",
+      "default": 1,
+      "info": "Aplica-se quando há 2 cards"
+    },
+    {
+      "type": "range",
+      "id": "card2_size",
+      "min": 1,
+      "max": 3,
+      "step": 0.5,
+      "label": "Tamanho do Card 2 (fr)",
+      "default": 1,
+      "info": "Aplica-se quando há 2 cards"
+    },
+
+    { "type": "header", "content": "Layout com 3 Cards" },
+
+    {
+      "type": "select",
+      "id": "three_cards_layout",
+      "options": [
+        { "value": "default", "label": "Layout Padrão (2 colunas)" },
+        { "value": "inline",  "label": "3 Cards lado a lado" }
+      ],
+      "default": "default",
+      "label": "Tipo de layout para 3 cards"
+    },
+    {
+      "type": "range",
+      "id": "three_card1_size",
+      "min": 1,
+      "max": 3,
+      "step": 0.5,
+      "label": "Tamanho do Card 1 (fr)",
+      "default": 1,
+      "info": "Aplica-se no layout lado a lado"
+    },
+    {
+      "type": "range",
+      "id": "three_card2_size",
+      "min": 1,
+      "max": 3,
+      "step": 0.5,
+      "label": "Tamanho do Card 2 (fr)",
+      "default": 1,
+      "info": "Aplica-se no layout lado a lado"
+    },
+    {
+      "type": "range",
+      "id": "three_card3_size",
+      "min": 1,
+      "max": 3,
+      "step": 0.5,
+      "label": "Tamanho do Card 3 (fr)",
+      "default": 1,
+      "info": "Aplica-se no layout lado a lado"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Card de Imagem",
+      "limit": 3,
+      "settings": [
+        { "type": "header", "content": "Imagem" },
+        { "type": "image_picker", "id": "image", "label": "Imagem" },
+
+        { "type": "header", "content": "Conteúdo" },
+        { "type": "checkbox", "id": "enable_heading", "label": "Ativar título", "default": true },
+        { "type": "text", "id": "heading", "default": "Título do Card", "label": "Título" },
+        { "type": "checkbox", "id": "enable_button", "label": "Ativar botão", "default": true },
+        { "type": "text", "id": "button_text", "default": "Saiba Mais", "label": "Texto do Botão" },
+        { "type": "url", "id": "button_link", "label": "Link do Botão" },
+        {
+          "type": "checkbox",
+          "id": "enable_card_link",
+          "label": "Tornar todo o card clicável",
+          "default": false,
+          "info": "Adiciona link em todo o card, não apenas no botão"
+        },
+        { "type": "url", "id": "card_link", "label": "Link do Card", "info": "Usado quando 'card clicável' está ativo" },
+
+        { "type": "header", "content": "Posicionamento" },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "options": [
+            { "value": "left",   "label": "Esquerda" },
+            { "value": "center", "label": "Centro" },
+            { "value": "right",  "label": "Direita" }
+          ],
+          "default": "center",
+          "label": "Alinhamento horizontal"
+        },
+        {
+          "type": "select",
+          "id": "vertical_alignment",
+          "options": [
+            { "value": "top",    "label": "Superior" },
+            { "value": "middle", "label": "Centro" },
+            { "value": "bottom", "label": "Inferior" }
+          ],
+          "default": "middle",
+          "label": "Alinhamento vertical"
+        },
+        {
+          "type": "select",
+          "id": "content_position",
+          "options": [
+            { "value": "top-left",     "label": "Superior Esquerda" },
+            { "value": "top-center",   "label": "Superior Centro" },
+            { "value": "top-right",    "label": "Superior Direita" },
+            { "value": "middle-left",  "label": "Meio Esquerda" },
+            { "value": "middle-center","label": "Centro" },
+            { "value": "middle-right", "label": "Meio Direita" },
+            { "value": "bottom-left",  "label": "Inferior Esquerda" },
+            { "value": "bottom-center","label": "Inferior Centro" },
+            { "value": "bottom-right", "label": "Inferior Direita" }
+          ],
+          "default": "middle-center",
+          "label": "Posição do conteúdo (legado)",
+          "info": "Use os controles acima para melhor precisão"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Grid de Imagens Dinâmica",
+      "category": "Imagem",
+      "blocks": [
+        { "type": "card", "settings": { "heading": "Primeiro Card",  "enable_heading": true, "enable_button": true } },
+        { "type": "card", "settings": { "heading": "Segundo Card",   "enable_heading": true, "enable_button": true } },
+        { "type": "card", "settings": { "heading": "Terceiro Card",  "enable_heading": true, "enable_button": true } }
+      ]
+    }
+  ]
+}
+{% endschema %}

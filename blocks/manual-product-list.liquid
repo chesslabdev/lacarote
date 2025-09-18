@@ -1,0 +1,820 @@
+{% comment %}
+  Theme Block para exibir uma lista de produtos selecionados manualmente
+  Similar ao product-recommendations mas com seleção manual de produtos
+{% endcomment %}
+
+{% liquid
+  case block.settings.layout_type
+    when 'grid'
+      assign classes = 'resource-list--grid'
+    when 'carousel'
+      assign classes = 'resource-list--carousel'
+  endcase
+
+  # Coletar produtos selecionados manualmente via collection
+  assign products_to_show = ''
+
+  if block.settings.manual_collection != blank
+    assign manual_collection = collections[block.settings.manual_collection]
+    if manual_collection != blank
+      assign products_to_show = manual_collection.products
+    endif
+  endif
+
+  # Definir classes de largura
+  assign width_classes = ''
+  case block.settings.block_width
+    when 'full-width'
+      assign width_classes = 'manual-product-list--full-width'
+    when 'page-width'
+      assign width_classes = 'manual-product-list--page-width'
+    when 'custom'
+      assign width_classes = 'manual-product-list--custom-width'
+  endcase
+%}
+
+<div
+  id="manual-product-list-{{ block.id }}"
+  class="manual-product-list {{ width_classes }}"
+  data-testid="manual-product-list-block"
+  {{ block.shopify_attributes }}
+  {% if block.settings.block_width == 'custom' %}
+    style="--custom-max-width: {{ block.settings.custom_width }}px;"
+  {% endif %}
+>
+  <div
+    class="
+      color-{{ section.settings.color_scheme }}
+      block-resource-list
+      spacing-style
+      gap-style
+    "
+    style="
+      {% render 'spacing-style', settings: block.settings %}
+      {% render 'gap-style', value: block.settings.gap %}
+      --resource-list-column-gap-desktop: {{ block.settings.columns_gap }}px;
+      --resource-list-row-gap-desktop: {{ block.settings.rows_gap }}px;
+      --resource-list-columns-mobile: repeat(auto-fill, minmax({{ block.settings.mobile_card_min_width }}px, 1fr));
+      --resource-list-columns-desktop: repeat(auto-fill, minmax({{ block.settings.desktop_card_min_width }}px, 1fr));
+    "
+  >
+    <div class="section-resource-list__content">
+      {% content_for 'blocks' %}
+    </div>
+
+    {% if products_to_show != blank and products_to_show.size > 0 %}
+      {% capture list_items %}
+        {% for product in products_to_show limit: block.settings.max_products %}
+          <div class="resource-list__item">
+            {% content_for 'block',
+              type: '_product-card',
+              id: 'manual-product-card',
+              closest.product: product
+            %}
+          </div>
+          {% if block.settings.layout_type == 'carousel' or block.settings.carousel_on_mobile %}
+            {% unless forloop.last %}
+              <!--@list/split-->
+            {% endunless %}
+          {% endif %}
+        {% endfor %}
+      {% endcapture %}
+
+      {% liquid
+        # Criar array dos itens da lista para usar no carousel
+        assign slide_content = list_items | strip
+        assign slides = slide_content | split: '<!--@list/split-->'
+
+        if products_to_show != blank and products_to_show.size > 0
+          assign has_products = 'true'
+        else
+          assign has_products = 'false'
+        endif
+      %}
+
+      <div
+        class="
+          resource-list
+          {% if block.settings.carousel_on_mobile and block.settings.layout_type != 'carousel' %}
+            hidden--mobile
+          {% endif %}
+          {{ classes }}
+        "
+        {% if block.settings.layout_type == 'grid' %}
+          data-testid="resource-list-grid"
+        {% endif %}
+        data-has-products="{{ has_products }}"
+      >
+        {% case block.settings.layout_type %}
+          {% when 'grid' %}
+            {{ list_items }}
+          {% when 'carousel' %}
+            {% render 'resource-list-carousel',
+              ref: 'manualProductListCarousel',
+              slides: slides,
+              slide_count: products_to_show.size,
+              settings: block.settings
+            %}
+        {% endcase %}
+      </div>
+
+      {% if block.settings.carousel_on_mobile and block.settings.layout_type != 'carousel' %}
+        {% liquid
+          assign mobile_carousel_gap = block.settings.columns_gap
+        %}
+        <div
+          class="
+            resource-list
+            hidden--desktop
+            force-full-width
+          "
+          style="--resource-list-gap: {{ mobile_carousel_gap }}px;"
+        >
+          {% render 'resource-list-carousel',
+            ref: 'manualProductListCarouselMobile',
+            slides: slides,
+            slide_count: products_to_show.size,
+            settings: block.settings
+          %}
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="manual-product-list__empty-state">
+        {% if request.design_mode %}
+          <div class="resource-list resource-list--grid">
+            {% for i in (1..block.settings.max_products) %}
+              <div
+                class="resource-list__item manual-product-list__skeleton-item"
+                aria-label="Selecione produtos para exibir"
+              ></div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% stylesheet %}
+  .manual-product-list-wrapper {
+    width: 100%;
+  }
+
+    .manual-product-list {
+      display: block;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Controles de largura */
+    .manual-product-list--full-width {
+      max-width: 100%;
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .manual-product-list--page-width {
+      max-width: var(--page-width, 1200px);
+      padding-left: var(--page-width-margin, 2rem);
+      padding-right: var(--page-width-margin, 2rem);
+    }
+
+    .manual-product-list--custom-width {
+      max-width: var(--custom-max-width, 800px);
+      padding-left: var(--page-width-margin, 2rem);
+      padding-right: var(--page-width-margin, 2rem);
+    }
+
+    /* Grid responsivo */
+    .manual-product-list .resource-list--grid {
+      display: grid;
+      grid-template-columns: var(--resource-list-columns-desktop);
+      gap: var(--resource-list-row-gap-desktop, 16px) var(--resource-list-column-gap-desktop, 16px);
+    }
+
+    /* Mobile grid */
+    @media screen and (max-width: 749px) {
+      .manual-product-list .resource-list--grid {
+        grid-template-columns: var(--resource-list-columns-mobile);
+        gap: calc(var(--resource-list-row-gap-desktop, 16px) * 0.75) calc(var(--resource-list-column-gap-desktop, 16px) * 0.75);
+      }
+
+      .manual-product-list--page-width,
+      .manual-product-list--custom-width {
+        padding-left: var(--page-width-margin-mobile, 1.5rem);
+        padding-right: var(--page-width-margin-mobile, 1.5rem);
+      }
+    }
+
+    /* Tablet adjustments */
+    @media screen and (min-width: 750px) and (max-width: 989px) {
+      .manual-product-list .resource-list--grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      }
+    }
+
+    /* Skeleton items */
+    .manual-product-list__skeleton-item {
+      aspect-ratio: 3 / 4;
+      background-color: var(--color-foreground);
+      opacity: var(--skeleton-opacity, 0.1);
+      border-radius: 4px;
+      position: relative;
+      border: 2px dashed var(--color-foreground);
+      background-color: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .manual-product-list__skeleton-item::after {
+      content: "Selecione produtos";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 0.875rem;
+      color: var(--color-foreground);
+      opacity: 0.6;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .manual-product-list__empty-state {
+      padding: 2rem;
+      text-align: center;
+      color: var(--color-foreground);
+      opacity: 0.6;
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Carousel adjustments */
+    .manual-product-list .resource-list--carousel {
+      overflow: hidden;
+    }
+
+    /* Force full width for mobile carousel */
+    .manual-product-list .force-full-width {
+      margin-left: calc(-1 * var(--page-width-margin-mobile, 1.5rem));
+      margin-right: calc(-1 * var(--page-width-margin-mobile, 1.5rem));
+      padding-left: var(--page-width-margin-mobile, 1.5rem);
+      padding-right: var(--page-width-margin-mobile, 1.5rem);
+    }
+
+    @media screen and (min-width: 750px) {
+      .manual-product-list .force-full-width {
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Manual Product List",
+  "class": "manual-product-list-wrapper",
+  "blocks": [
+    {
+      "type": "@theme"
+    },
+    {
+      "type": "@app"
+    }
+  ],
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Selecione uma coleção manual para exibir produtos específicos. Crie uma coleção manual com os produtos desejados."
+    },
+    {
+      "type": "header",
+      "content": "Produtos Selecionados"
+    },
+    {
+      "type": "collection",
+      "id": "manual_collection",
+      "label": "Coleção com produtos selecionados",
+      "info": "Crie uma coleção manual com os produtos que deseja exibir aqui"
+    },
+    {
+      "type": "header",
+      "content": "Layout e Largura"
+    },
+    {
+      "type": "select",
+      "id": "block_width",
+      "label": "Largura do bloco",
+      "options": [
+        {
+          "value": "full-width",
+          "label": "Largura total"
+        },
+        {
+          "value": "page-width",
+          "label": "Largura da página"
+        },
+        {
+          "value": "custom",
+          "label": "Largura personalizada"
+        }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "range",
+      "id": "custom_width",
+      "label": "Largura personalizada",
+      "min": 300,
+      "max": 1400,
+      "step": 50,
+      "unit": "px",
+      "default": 800,
+      "visible_if": "{{ block.settings.block_width == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "layout_type",
+      "label": "Estilo do layout",
+      "options": [
+        {
+          "value": "grid",
+          "label": "Grid"
+        },
+        {
+          "value": "carousel",
+          "label": "Carousel"
+        }
+      ],
+      "default": "grid"
+    },
+    {
+      "type": "checkbox",
+      "id": "carousel_on_mobile",
+      "label": "Carousel no mobile",
+      "default": true,
+      "visible_if": "{{ block.settings.layout_type == 'grid' }}"
+    },
+    {
+      "type": "range",
+      "id": "max_products",
+      "label": "Máximo de produtos",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "Configurações do Grid"
+    },
+    {
+      "type": "range",
+      "id": "desktop_card_min_width",
+      "label": "Largura mínima do card (Desktop)",
+      "min": 150,
+      "max": 400,
+      "step": 10,
+      "unit": "px",
+      "default": 250,
+      "info": "Define quantos cards cabem por linha no desktop"
+    },
+    {
+      "type": "range",
+      "id": "mobile_card_min_width",
+      "label": "Largura mínima do card (Mobile)",
+      "min": 120,
+      "max": 300,
+      "step": 2,
+      "unit": "px",
+      "default": 148,
+      "info": "Define quantos cards cabem por linha no mobile"
+    },
+    {
+      "type": "range",
+      "id": "columns_gap",
+      "label": "Espaçamento horizontal",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 16,
+      "visible_if": "{{ block.settings.layout_type == 'grid' or block.settings.layout_type == 'carousel' }}"
+    },
+    {
+      "type": "range",
+      "id": "rows_gap",
+      "label": "Espaçamento vertical",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 16,
+      "visible_if": "{{ block.settings.layout_type == 'grid' }}"
+    },
+    {
+      "type": "header",
+      "content": "Navegação do Carousel",
+      "visible_if": "{{ block.settings.layout_type == 'carousel' or block.settings.carousel_on_mobile == true }}"
+    },
+    {
+      "type": "select",
+      "id": "icons_style",
+      "label": "Ícones de navegação",
+      "options": [
+        {
+          "value": "arrow",
+          "label": "Setas"
+        },
+        {
+          "value": "chevron",
+          "label": "Chevrons"
+        },
+        {
+          "value": "arrows_large",
+          "label": "Setas grandes"
+        },
+        {
+          "value": "chevron_large",
+          "label": "Chevrons grandes"
+        },
+        {
+          "value": "none",
+          "label": "Nenhum"
+        }
+      ],
+      "default": "arrow",
+      "visible_if": "{{ block.settings.layout_type == 'carousel' or block.settings.carousel_on_mobile == true }}"
+    },
+    {
+      "type": "select",
+      "id": "icons_shape",
+      "label": "Fundo dos ícones",
+      "options": [
+        {
+          "value": "none",
+          "label": "Nenhum"
+        },
+        {
+          "value": "circle",
+          "label": "Círculo"
+        },
+        {
+          "value": "square",
+          "label": "Quadrado"
+        }
+      ],
+      "default": "none",
+      "visible_if": "{{ block.settings.icons_style != 'none' and block.settings.layout_type == 'carousel' or block.settings.carousel_on_mobile == true }}"
+    },
+    {
+      "type": "header",
+      "content": "Espaçamento Geral"
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Espaçamento entre blocos",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Esquema de cores",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Padding superior",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Padding inferior",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Lista Manual - Page Width",
+      "category": "Product",
+      "settings": {
+        "block_width": "page-width",
+        "layout_type": "grid",
+        "max_products": 4,
+        "desktop_card_min_width": 250,
+        "mobile_card_min_width": 148,
+        "columns_gap": 16,
+        "rows_gap": 16,
+        "carousel_on_mobile": true,
+        "icons_style": "arrow",
+        "icons_shape": "none",
+        "gap": 12,
+        "color_scheme": "scheme-1",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      },
+      "blocks": {
+        "heading": {
+          "type": "text",
+          "settings": {
+            "text": "<h4>Produtos Selecionados</h4>"
+          }
+        },
+        "manual-product-card": {
+          "type": "_product-card",
+          "static": true,
+          "settings": {
+            "product_card_gap": 4
+          },
+          "blocks": {
+            "product-card-gallery": {
+              "type": "_product-card-gallery",
+              "settings": {
+                "image_ratio": "portrait",
+                "border": "none",
+                "border_width": 1,
+                "border_opacity": 100,
+                "border_radius": 0,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              }
+            },
+            "product_title": {
+              "type": "product-title",
+              "name": "Product Title",
+              "settings": {
+                "width": "fit-content",
+                "max_width": "normal",
+                "alignment": "left",
+                "type_preset": "rte",
+                "font": "var(--font-body--family)",
+                "font_size": "1rem",
+                "line_height": "normal",
+                "letter_spacing": "normal",
+                "case": "none",
+                "wrap": "pretty",
+                "color": "var(--color-foreground)",
+                "background": false,
+                "background_color": "#00000026",
+                "corner_radius": 0,
+                "padding-block-start": 4,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              }
+            },
+            "price": {
+              "type": "price",
+              "name": "Product Price",
+              "settings": {
+                "show_sale_price_first": true,
+                "show_installments": false,
+                "show_tax_info": false,
+                "type_preset": "h6",
+                "width": "100%",
+                "alignment": "left",
+                "font": "var(--font-body--family)",
+                "font_size": "1rem",
+                "line_height": "normal",
+                "letter_spacing": "normal",
+                "case": "none",
+                "color": "var(--color-foreground)",
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              }
+            }
+          },
+          "block_order": ["product-card-gallery", "product_title", "price"]
+        }
+      },
+      "block_order": ["heading"]
+    },
+    {
+      "name": "Lista Manual - Full Width",
+      "category": "Product",
+      "settings": {
+        "block_width": "full-width",
+        "layout_type": "carousel",
+        "max_products": 6,
+        "desktop_card_min_width": 280,
+        "mobile_card_min_width": 160,
+        "columns_gap": 20,
+        "rows_gap": 20,
+        "carousel_on_mobile": false,
+        "icons_style": "arrow",
+        "icons_shape": "circle",
+        "gap": 16,
+        "color_scheme": "scheme-1",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      },
+      "blocks": {
+        "heading": {
+          "type": "text",
+          "settings": {
+            "text": "<h4>Nossos Produtos Favoritos</h4>"
+          }
+        },
+        "manual-product-card": {
+          "type": "_product-card",
+          "static": true,
+          "settings": {
+            "product_card_gap": 4
+          },
+          "blocks": {
+            "product-card-gallery": {
+              "type": "_product-card-gallery",
+              "settings": {
+                "image_ratio": "portrait",
+                "border": "none",
+                "border_width": 1,
+                "border_opacity": 100,
+                "border_radius": 0,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              }
+            },
+            "product_title": {
+              "type": "product-title",
+              "name": "Product Title",
+              "settings": {
+                "width": "fit-content",
+                "max_width": "normal",
+                "alignment": "left",
+                "type_preset": "rte",
+                "font": "var(--font-body--family)",
+                "font_size": "1rem",
+                "line_height": "normal",
+                "letter_spacing": "normal",
+                "case": "none",
+                "wrap": "pretty",
+                "color": "var(--color-foreground)",
+                "background": false,
+                "background_color": "#00000026",
+                "corner_radius": 0,
+                "padding-block-start": 4,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              }
+            },
+            "price": {
+              "type": "price",
+              "name": "Product Price",
+              "settings": {
+                "show_sale_price_first": true,
+                "show_installments": false,
+                "show_tax_info": false,
+                "type_preset": "h6",
+                "width": "100%",
+                "alignment": "left",
+                "font": "var(--font-body--family)",
+                "font_size": "1rem",
+                "line_height": "normal",
+                "letter_spacing": "normal",
+                "case": "none",
+                "color": "var(--color-foreground)",
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              }
+            }
+          },
+          "block_order": ["product-card-gallery", "product_title", "price"]
+        }
+      },
+      "block_order": ["heading"]
+    },
+    {
+      "name": "Lista Manual - Custom",
+      "category": "Product",
+      "settings": {
+        "block_width": "custom",
+        "custom_width": 900,
+        "layout_type": "grid",
+        "max_products": 8,
+        "desktop_card_min_width": 200,
+        "mobile_card_min_width": 140,
+        "columns_gap": 12,
+        "rows_gap": 20,
+        "carousel_on_mobile": true,
+        "icons_style": "chevron",
+        "icons_shape": "none",
+        "gap": 8,
+        "color_scheme": "scheme-1",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      },
+      "blocks": {
+        "heading": {
+          "type": "text",
+          "settings": {
+            "text": "<h4>Coleção Personalizada</h4>"
+          }
+        },
+        "manual-product-card": {
+          "type": "_product-card",
+          "static": true,
+          "settings": {
+            "product_card_gap": 4
+          },
+          "blocks": {
+            "product-card-gallery": {
+              "type": "_product-card-gallery",
+              "settings": {
+                "image_ratio": "square",
+                "border": "none",
+                "border_width": 1,
+                "border_opacity": 100,
+                "border_radius": 8,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              }
+            },
+            "product_title": {
+              "type": "product-title",
+              "name": "Product Title",
+              "settings": {
+                "width": "fit-content",
+                "max_width": "normal",
+                "alignment": "center",
+                "type_preset": "rte",
+                "font": "var(--font-body--family)",
+                "font_size": "0.875rem",
+                "line_height": "normal",
+                "letter_spacing": "normal",
+                "case": "none",
+                "wrap": "pretty",
+                "color": "var(--color-foreground)",
+                "background": false,
+                "background_color": "#00000026",
+                "corner_radius": 0,
+                "padding-block-start": 4,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              }
+            },
+            "price": {
+              "type": "price",
+              "name": "Product Price",
+              "settings": {
+                "show_sale_price_first": true,
+                "show_installments": false,
+                "show_tax_info": false,
+                "type_preset": "h6",
+                "width": "100%",
+                "alignment": "center",
+                "font": "var(--font-body--family)",
+                "font_size": "0.875rem",
+                "line_height": "normal",
+                "letter_spacing": "normal",
+                "case": "none",
+                "color": "var(--color-foreground)",
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              }
+            }
+          },
+          "block_order": ["product-card-gallery", "product_title", "price"]
+        }
+      },
+      "block_order": ["heading"]
+    }
+  ]
+}
+{% endschema %}

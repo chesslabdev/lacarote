@@ -1,0 +1,456 @@
+/*
+ * Grid de Imagens - Estilos com Controladores Avançados
+ * Arquivo: assets/grid-images.css
+ */
+
+/* ===== Container Principal ===== */
+.grid-image-section {
+  padding-top: var(--section-padding-top, 24px);
+  padding-bottom: var(--section-padding-bottom, 24px);
+  width: 100%;
+  --grid-gap: 24px;
+}
+
+/* Largura da página */
+.page-width--full .grid-container {
+  width: 100%;
+  max-width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.page-width--contained .grid-container {
+  width: 100%;
+  max-width: var(--page-width, 1200px);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--grid-padding-x, 1.5rem);
+  padding-right: var(--grid-padding-x, 1.5rem);
+}
+
+.grid-container {
+  height: 580px;
+}
+
+/* ===== Layouts ===== */
+
+/* Layout: 1 Card (Full Width) */
+.grid-layout--single .grid-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--grid-gap);
+}
+
+/* Layout: 2 Cards (Lado a Lado) */
+.grid-layout--two-cards .grid-container {
+  display: grid;
+  grid-template-columns: var(--grid-template, 1fr 1fr);
+  gap: var(--grid-gap);
+}
+
+/* Layout: 3 Cards - Padrão (2 colunas) */
+.grid-layout--default .grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--grid-gap);
+}
+
+.grid-layout--default .grid-item--large {
+  grid-row: span 1;
+}
+
+.grid-layout--default .grid-item--split {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: var(--grid-gap);
+}
+
+/* Layout: 3 Cards (Lado a Lado) */
+.grid-layout--three-cards .grid-container {
+  display: grid;
+  grid-template-columns: var(--grid-template, 1fr 1fr 1fr);
+  gap: var(--grid-gap);
+}
+
+/* ===== Card Base ===== */
+.grid-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--border-radius, 0);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Card Clicável */
+.grid-card--clickable {
+  cursor: pointer;
+}
+
+.grid-card__link-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+}
+
+/* ===== Imagem do Card ===== */
+.grid-card__image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+/* ===== Overlay Gradiente Customizável ===== */
+.grid-card__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    var(--gradient-angle, 211deg), 
+    var(--gradient-start-color, rgba(255, 255, 255, 0)) var(--gradient-start-position, 31.83%), 
+    var(--gradient-end-color, rgba(234, 226, 226, 0.8)) var(--gradient-end-position, 83.77%)
+  );
+    transition: opacity 0.3s ease;
+}
+
+.grid-card:hover .grid-card__overlay {
+  opacity: 0.9;
+}
+
+/* ===== Conteúdo do Card ===== */
+.grid-card__content {
+  position: relative;
+    padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.grid-card__content > * {
+  pointer-events: auto;
+}
+
+/* Quando o card é clicável, desabilitar pointer events no botão */
+.grid-card--clickable .grid-card__button {
+  pointer-events: none;
+}
+
+/* ===== Posicionamento do Conteúdo ===== */
+
+/* Alinhamento Vertical */
+.content-position--top {
+  justify-content: flex-start;
+}
+
+.content-position--middle {
+  justify-content: center;
+}
+
+.content-position--bottom {
+  justify-content: flex-end;
+}
+
+/* Alinhamento Horizontal */
+.content-position--left {
+  align-items: flex-start;
+}
+
+.content-position--center {
+  align-items: center;
+}
+
+.content-position--right {
+  align-items: flex-end;
+}
+
+/* ===== Alinhamento de Texto ===== */
+.text-align--left {
+  text-align: left;
+}
+
+.text-align--center {
+  text-align: center;
+}
+
+.text-align--right {
+  text-align: right;
+}
+
+/* ===== Título com Controladores ===== */
+.grid-card__heading {
+  color: rgb(var(--color-foreground));
+  font-size: var(--heading-font-size-desktop, 48px);
+  font-weight: var(--heading-font-weight, 600);
+  font-family: var(--heading-font-family, var(--font-heading-family));
+  text-transform: var(--heading-text-transform, none);
+  letter-spacing: var(--heading-letter-spacing, 0);
+  line-height: var(--heading-line-height, 1.2);
+  text-decoration-line: underline;
+  margin: 0;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.grid-card__heading.no-underline {
+  text-decoration-line: none;
+}
+
+/* ===== Botão Customizável ===== */
+.grid-card__button {
+  background-color: var(--button-background, rgb(var(--color-button)));
+  color: var(--button-text-color, rgb(var(--color-button-text)));
+  padding: 12px 30px;
+  text-decoration: none;
+  font-weight: 500;
+  border-radius: var(--button-border-radius, 4px);
+  border-width: var(--button-border-width, 0);
+  border-style: solid;
+  border-color: var(--button-border-color, transparent);
+  transition: all 0.3s ease;
+  display: inline-block;
+  cursor: pointer;
+  max-width: fit-content;
+  animation: fadeInUp 0.6s ease-out 0.2s backwards;
+}
+
+.grid-card__button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.grid-card__button:focus-visible {
+  outline: 2px solid rgb(var(--color-foreground));
+  outline-offset: 2px;
+}
+
+/* Quando é apenas span (card clicável) */
+span.grid-card__button {
+  cursor: inherit;
+}
+
+/* ===== Esquemas de Cores ===== */
+.color-background-1 {
+  background-color: rgb(var(--color-base-background-1));
+}
+
+.color-background-2 {
+  background-color: rgb(var(--color-base-background-2));
+}
+
+.color-inverse {
+  background-color: rgb(var(--color-base-solid-button-labels));
+}
+
+.color-inverse .grid-card__heading {
+  color: rgb(var(--color-base-background-1));
+}
+
+.color-accent-1 {
+  background-color: rgb(var(--color-base-accent-1));
+}
+
+.color-accent-2 {
+  background-color: rgb(var(--color-base-accent-2));
+}
+
+/* ===== Animações ===== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .grid-card {
+    animation: fadeInUp 0.6s ease-out;
+  }
+
+  .grid-card:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .grid-card:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+}
+
+/* ===== Ripple Effect ===== */
+.button-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.grid-card__button {
+  position: relative;
+  overflow: hidden;
+}
+
+/* ===== Estados Especiais ===== */
+.grid-card.is-selected {
+  box-shadow: 0 0 0 3px rgba(var(--color-foreground), 0.5);
+}
+
+.grid-card.animated {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.grid-card__content.has-focus {
+  outline: 2px dashed rgba(var(--color-foreground), 0.5);
+  outline-offset: 4px;
+}
+
+/* ===== Mobile Styles (Max 749px) ===== */
+@media screen and (max-width: 749px) {
+  .grid-container {
+    height: auto !important;
+  }
+
+  /* Largura da página no mobile */
+  .page-width--contained .grid-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  /* Todos os layouts viram vertical no mobile */
+  .grid-layout--single .grid-container,
+  .grid-layout--two-cards .grid-container,
+  .grid-layout--default .grid-container,
+  .grid-layout--three-cards .grid-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--grid-gap);
+  }
+
+  .grid-layout--default .grid-item--split {
+    display: flex;
+    flex-direction: column;
+    gap: var(--grid-gap);
+  }
+
+  .grid-card {
+    height: 400px;
+    min-height: 400px;
+  }
+
+  .grid-card__heading {
+    font-size: var(--heading-font-size-mobile, 32px);
+  }
+
+  .grid-card__content {
+    padding: 24px;
+  }
+
+  .grid-card__button {
+    padding: 10px 24px;
+    font-size: 14px;
+  }
+}
+
+/* ===== Tablet Styles (750px to 989px) ===== */
+@media screen and (min-width: 750px) and (max-width: 989px) {
+  .grid-card__heading {
+    font-size: calc(var(--heading-font-size-desktop, 48px) * 0.8);
+  }
+
+  .grid-card__content {
+    padding: 30px;
+  }
+
+  /* Ajuste para 3 cards no tablet */
+  .grid-layout--three-cards .grid-container {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .grid-layout--three-cards .grid-item:last-child {
+    grid-column: span 2;
+  }
+}
+
+/* ===== Estados de Loading ===== */
+.grid-card__image.loading {
+  opacity: 0;
+}
+
+.grid-card__image.loaded {
+  animation: fadeIn 0.5s ease-out;
+  opacity: 1;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ===== Placeholder SVG ===== */
+.placeholder-svg {
+  background: linear-gradient(
+    135deg,
+    rgb(var(--color-base-background-2)) 0%,
+    rgb(var(--color-base-background-1)) 100%
+  );
+  opacity: 0.3;
+}
+
+/* ===== Utilitários de Acessibilidade ===== */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* ===== Modo de Alto Contraste ===== */
+@media (prefers-contrast: high) {
+  .grid-card__overlay {
+    opacity: 0.7;
+  }
+
+  .grid-card__button {
+    border: 2px solid currentColor;
+  }
+
+  .grid-card__heading {
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  }
+}
+
+
+@media print {
+  .grid-image-section {
+    break-inside: avoid;
+  }
+
+  .grid-card {
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
+  .grid-card__button {
+    border: 1px solid currentColor;
+  }
+}

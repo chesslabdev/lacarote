@@ -1,0 +1,91 @@
+{{ 'regua-fio.css' | asset_url | stylesheet_tag }}
+
+{% schema %}
+{
+  "name": "Banner Regua Fio",
+  "tag": "section",
+  "class": "regua-fio-section",
+  "presets": [{"name": "Banner Regua Fio"}],
+  "settings": [
+    {
+      "type": "color",
+      "id": "fundo_cor",
+      "label": "Escolha cor para fundo liso"
+    },
+    {
+      "type": "color",
+      "id": "cortitulo",
+      "label": "Cor do titulo",
+      "default": "#000"
+    },
+    {
+      "type": "color",
+      "id": "cortexto",
+      "label": "Cor do texto",
+      "default": "#000"
+    }
+  ],
+  "max_blocks": 3,
+  "blocks":
+  [
+    {
+      "type": "column",
+      "name": "Regua",
+      "settings":
+      [
+        {
+        "type": "image_picker",
+        "id": "imageregua",
+        "label": "Icone",
+        "info": "Imagem no formato .svg"
+        },
+        {
+        "type": "richtext",
+        "id": "textoregua",
+        "label": "Descrição"
+        }
+        ]
+    }
+  ]
+}
+{% endschema %}
+
+{%- style -%}
+  .regua-fio-wraper-swiper-container {
+        background-color: {{ section.settings.fundo_cor }};
+      }
+  .texto-regua h3 {
+    color: {{ section.settings.cortitulo }};
+  }
+  .texto-regua p {
+    color: {{ section.settings.cortexto }};
+  }
+{%- endstyle -%}
+
+<div class="regua-fio-wraper-swiper-container">
+  <!-- Slider main container -->
+  <div class="regua-fio-wraper swiper">
+    <!-- Additional required wrapper -->
+    <div class="regua-fio swiper-wrapper">
+      <!-- Slides -->
+      {% for block in section.blocks %}
+        <div class="card-regua swiper-slide">
+          <div class="card-regua-content">
+            <img
+              src="{{ block.settings.imageregua  | img_url: 'master'}}"
+              style="height: 36px; width: auto;"
+              alt="icone"
+            >
+            <div class="texto-regua">
+              <p>{{ block.settings.textoregua }}</p>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    <!-- If we need pagination -->
+  </div>
+  <div class="regua-fio swiper-pagination"></div>
+</div>
+
+<script src="{{ 'regua-fio.js' | asset_url }}" defer></script>
